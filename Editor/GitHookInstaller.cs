@@ -2,16 +2,18 @@ using Debug = UnityEngine.Debug;
 using UnityEditor;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography;
+using System;
 
 [InitializeOnLoad]
 public class GitHookInstaller
 {
     static GitHookInstaller()
     {
-        InstallToolsAndGitHookOnce();
+        InstallToolsAndGitHookIfNeeded();
     }
 
-    static void InstallToolsAndGitHookOnce()
+    static void InstallToolsAndGitHookIfNeeded()
     {
         string projectRoot = Directory.GetCurrentDirectory();
         string repoRoot = Directory.GetParent(projectRoot).FullName;
@@ -19,15 +21,27 @@ public class GitHookInstaller
         string gitHookPath = Path.Combine(repoRoot, ".git", "hooks");
         string flagFile = Path.Combine(gitHookPath, "pre-push.githookinstalled");
         string installScript = Path.Combine(repoRoot, ".githooks", "install-hooks.sh");
+        string sourceHook = Path.Combine(repoRoot, ".githooks", "pre-push");
+        string toolManifestPath = Path.Combine(projectRoot, ".config", "dotnet-tools.json");
 
-        if (File.Exists(flagFile))
+        if (!File.Exists(sourceHook))
+        {
+            Debug.LogError("GitHookInstaller: 找不到 pre-push hook，請確認路徑是否正確");
+            return;
+        }
+
+        string currentHash = ComputeFileHash(sourceHook);
+        string savedHash = File.Exists(flagFile) ? File.ReadAllText(flagFile).Trim() : "";
+
+        if (currentHash == savedHash)
         {
             return;
         }
 
-        // run dotnet new tool-manifest
-        if (!RunShellCommand("dotnet", "new tool-manifest", projectRoot)) return;
-        // run dotnet tool install dotnet-format
+        if (!File.Exists(toolManifestPath))
+        {
+            if (!RunShellCommand("dotnet", "new tool-manifest", projectRoot)) return;
+        }
         if (!RunShellCommand("dotnet", "tool install dotnet-format", projectRoot)) return;
 
         if (!File.Exists(installScript))
@@ -38,8 +52,16 @@ public class GitHookInstaller
 
         if (!RunShellCommand("cmd.exe", $"/c \"{installScript}\"", repoRoot)) return;
 
-        File.WriteAllText(flagFile, "Git hooks installed");
-        Debug.Log("GitHookInstaller: 安裝完成");
+        File.WriteAllText(flagFile, currentHash);
+        Debug.Log("GitHookInstaller: Git hook 已更新並安裝完成");
+    }
+
+    static string ComputeFileHash(string filePath)
+    {
+        using var sha256 = SHA256.Create();
+        using var stream = File.OpenRead(filePath);
+        byte[] hashBytes = sha256.ComputeHash(stream);
+        return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
     }
 
     static bool RunShellCommand(string fileName, string arguments, string workingDirectory)
@@ -63,7 +85,7 @@ public class GitHookInstaller
 
             return true;
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Debug.LogError($"GitHookInstaller: 執行指令失敗：{ex.Message}");
             return false;
