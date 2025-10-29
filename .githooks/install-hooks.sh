@@ -1,0 +1,5 @@
+echo "Installing Git pre-push hook..."
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cp "$SCRIPT_DIR/pre-push" "$SCRIPT_DIR/../.git/hooks/pre-push"
+chmod +x "$SCRIPT_DIR/../.git/hooks/pre-push"
+echo "Hook installed."

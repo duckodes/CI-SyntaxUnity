@@ -1,0 +1,133 @@
+root = true
+
+[*.cs]
+
+########################################
+# Visual Studio 預設格式
+########################################
+
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+charset = utf-8
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = true
+csharp_new_line_before_open_brace = all
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = flush_left
+
+########################################
+# 命名風格定義
+########################################
+
+# PascalCase
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+dotnet_naming_style.pascal_case_style.required_prefix =
+dotnet_naming_style.pascal_case_style.required_suffix =
+
+# I + PascalCase
+dotnet_naming_style.interface_pascal_style.capitalization = pascal_case
+dotnet_naming_style.interface_pascal_style.required_prefix = I
+dotnet_naming_style.interface_pascal_style.required_suffix =
+
+# _camelCase
+dotnet_naming_style._camel_case_style.capitalization = camel_case
+dotnet_naming_style._camel_case_style.required_prefix = _
+dotnet_naming_style._camel_case_style.required_suffix =
+
+# s_camelCase
+dotnet_naming_style.s_camel_case_style.capitalization = camel_case
+dotnet_naming_style.s_camel_case_style.required_prefix = s_
+dotnet_naming_style.s_camel_case_style.required_suffix =
+
+# camelCase
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+dotnet_naming_style.camel_case_style.required_prefix =
+dotnet_naming_style.camel_case_style.required_suffix =
+
+########################################
+# 命名符號群組定義
+########################################
+
+# class, struct, delegate
+dotnet_naming_symbols.types_symbols.applicable_kinds = class, struct, delegate
+dotnet_naming_symbols.types_symbols.applicable_accessibilities = *
+dotnet_naming_symbols.types_symbols.required_modifiers =
+
+# interface
+dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
+dotnet_naming_symbols.interface_symbols.applicable_accessibilities = *
+dotnet_naming_symbols.interface_symbols.required_modifiers =
+
+# public 欄位
+dotnet_naming_symbols.public_fields.applicable_kinds = field
+dotnet_naming_symbols.public_fields.applicable_accessibilities = public
+
+# public 屬性
+dotnet_naming_symbols.public_properties.applicable_kinds = property
+dotnet_naming_symbols.public_properties.applicable_accessibilities = public
+
+# public 事件
+dotnet_naming_symbols.public_events.applicable_kinds = event
+dotnet_naming_symbols.public_events.applicable_accessibilities = public
+
+# 所有方法
+dotnet_naming_symbols.all_methods.applicable_kinds = method
+dotnet_naming_symbols.all_methods.applicable_accessibilities = *
+
+# 區域函式與變數
+dotnet_naming_symbols.local_variables.applicable_kinds = local
+dotnet_naming_symbols.local_variables.applicable_accessibilities = *
+
+# private/internal 欄位
+dotnet_naming_symbols.private_internal_fields.applicable_kinds = field
+dotnet_naming_symbols.private_internal_fields.applicable_accessibilities = private, internal
+
+# static 或 private internal 欄位
+dotnet_naming_symbols.static_or_private_internal_fields.applicable_kinds = field
+dotnet_naming_symbols.static_or_private_internal_fields.applicable_accessibilities = private, internal
+dotnet_naming_symbols.static_or_private_internal_fields.required_modifiers = static
+
+########################################
+# 命名規則套用
+########################################
+
+dotnet_naming_rule.types_should_be_pascal.symbols = types_symbols
+dotnet_naming_rule.types_should_be_pascal.style = pascal_case_style
+dotnet_naming_rule.types_should_be_pascal.severity = error
+
+dotnet_naming_rule.interfaces_should_be_I_pascal.symbols = interface_symbols
+dotnet_naming_rule.interfaces_should_be_I_pascal.style = interface_pascal_style
+dotnet_naming_rule.interfaces_should_be_I_pascal.severity = error
+
+dotnet_naming_rule.public_fields_should_be_pascal.symbols = public_fields
+dotnet_naming_rule.public_fields_should_be_pascal.style = pascal_case_style
+dotnet_naming_rule.public_fields_should_be_pascal.severity = error
+
+dotnet_naming_rule.public_properties_should_be_pascal.symbols = public_properties
+dotnet_naming_rule.public_properties_should_be_pascal.style = pascal_case_style
+dotnet_naming_rule.public_properties_should_be_pascal.severity = error
+
+dotnet_naming_rule.public_events_should_be_pascal.symbols = public_events
+dotnet_naming_rule.public_events_should_be_pascal.style = pascal_case_style
+dotnet_naming_rule.public_events_should_be_pascal.severity = error
+
+dotnet_naming_rule.methods_should_be_pascal.symbols = all_methods
+dotnet_naming_rule.methods_should_be_pascal.style = pascal_case_style
+dotnet_naming_rule.methods_should_be_pascal.severity = error
+
+dotnet_naming_rule.locals_should_be_camel.symbols = local_variables
+dotnet_naming_rule.locals_should_be_camel.style = camel_case_style
+dotnet_naming_rule.locals_should_be_camel.severity = error
+
+dotnet_naming_rule.private_internal_fields_should_be__camel.symbols = private_internal_fields
+dotnet_naming_rule.private_internal_fields_should_be__camel.style = _camel_case_style
+dotnet_naming_rule.private_internal_fields_should_be__camel.severity = error
+
+dotnet_naming_rule.static_or_private_internal_fields_should_be_s_camel.symbols = static_or_private_internal_fields
+dotnet_naming_rule.static_or_private_internal_fields_should_be_s_camel.style = s_camel_case_style
+dotnet_naming_rule.static_or_private_internal_fields_should_be_s_camel.severity = error
+
+[*.csproj]
+# 不套用任何格式規則，避免 dotnet format 檢查此類型
