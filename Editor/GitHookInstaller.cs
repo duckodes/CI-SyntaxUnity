@@ -20,7 +20,7 @@ public class GitHookInstaller
 
         string gitHookPath = Path.Combine(repoRoot, ".git", "hooks");
         string flagFile = Path.Combine(gitHookPath, "pre-push.githookinstalled");
-        string installScript = Path.Combine(repoRoot, ".githooks", "install-hooks.sh");
+        string installScript = Path.Combine(repoRoot, ".githooks", "install-hooks.cmd");
         string sourceHook = Path.Combine(repoRoot, ".githooks", "pre-push");
         string toolManifestPath = Path.Combine(projectRoot, ".config", "dotnet-tools.json");
 
@@ -46,7 +46,7 @@ public class GitHookInstaller
 
         if (!File.Exists(installScript))
         {
-            Debug.LogError("GitHookInstaller: 找不到 install-hooks.sh，請確認路徑是否正確");
+            Debug.LogError("GitHookInstaller: 找不到 install-hooks.cmd，請確認路徑是否正確");
             return;
         }
 
