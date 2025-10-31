@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# Check for format violations
+echo "執行 Unity 專案的程式碼格式檢查（使用 .editorconfig 規則）..."
+
+# 尋找 .sln 檔案並轉成絕對路徑
+sln_path=$(find . -type f -name "*.sln" | head -n 1)
+if [ -z "$sln_path" ]; then
+    echo "找不到 .sln 檔案，無法執行格式檢查"
+    exit 1
+fi
+
+# 取得 .sln 所在目錄並切換過去
+sln_dir=$(cd "$(dirname "$sln_path")" && pwd)
+cd "$sln_dir" || {
+    echo "無法切換到 .sln 所在目錄：$sln_dir"
+    exit 1
+}
+
+# 絕對路徑的 .sln 檔案
+sln_path="$sln_dir/$(basename "$sln_path")"
+echo "找到 .sln 檔案：$sln_path"
+
+# 檢查 dotnet CLI 是否可用
+if ! command -v dotnet &> /dev/null; then
+    echo "dotnet CLI 未安裝，請先安裝 .NET SDK"
+    exit 1
+fi
+
+# 檢查是否已安裝 dotnet-format（local tool）
+if ! dotnet tool list | grep -q dotnet-format; then
+    echo "尚未安裝 dotnet-format，請執行：dotnet tool install dotnet-format"
+    exit 1
+fi
+
+# 執行格式檢查（使用 .sln + .editorconfig）
+dotnet tool run dotnet-format "$sln_path" --check --fix-style warn
+FORMAT_RESULT=$?
+
+if [ $FORMAT_RESULT -ne 0 ]; then
+    echo "程式碼格式錯誤，請依據 .editorconfig 修正後再 commit"
+    exit 1
+fi
+
+echo "格式檢查通過，繼續 commit"
