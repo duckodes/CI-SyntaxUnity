@@ -6,21 +6,21 @@ using System.Security.Cryptography;
 using System;
 
 [InitializeOnLoad]
-public class GitHookInstaller
+public class GitHookCommitInstaller
 {
-    static GitHookInstaller()
+    static GitHookCommitInstaller()
     {
-        InstallToolsAndGitHookIfNeeded();
+        InstallGitHookTools();
     }
 
-    static void InstallToolsAndGitHookIfNeeded()
+    static void InstallGitHookTools()
     {
         string projectRoot = Directory.GetCurrentDirectory();
         string repoRoot = Directory.GetParent(projectRoot).FullName;
 
         string gitHookPath = Path.Combine(repoRoot, ".git", "hooks");
         string flagFile = Path.Combine(gitHookPath, "pre-commit.githookinstalled");
-        string installScript = Path.Combine(repoRoot, ".githooks", "install-hooks.cmd");
+        string installScript = Path.Combine(repoRoot, ".githooks", "install-commit-hooks.cmd");
         string sourceHook = Path.Combine(repoRoot, ".githooks", "pre-commit");
         string toolManifestPath = Path.Combine(projectRoot, ".config", "dotnet-tools.json");
 
@@ -46,14 +46,14 @@ public class GitHookInstaller
 
         if (!File.Exists(installScript))
         {
-            Debug.LogError("GitHookInstaller: 找不到 install-hooks.cmd，請確認路徑是否正確");
+            Debug.LogError("GitHookInstaller: 找不到 install-commit-hooks.cmd，請確認路徑是否正確");
             return;
         }
 
         if (!RunShellCommand("cmd.exe", $"/c \"{installScript}\"", repoRoot)) return;
 
         File.WriteAllText(flagFile, currentHash);
-        Debug.Log("GitHookInstaller: Git hook 已更新並安裝完成");
+        Debug.Log("GitHookInstaller: Git hook Commit 已更新並安裝完成");
     }
 
     static string ComputeFileHash(string filePath)
