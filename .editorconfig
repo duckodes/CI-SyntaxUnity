@@ -139,7 +139,7 @@ dotnet_naming_rule.static_or_private_internal_fields_should_be_s_camel.style = s
 dotnet_naming_rule.static_or_private_internal_fields_should_be_s_camel.severity = error
 
 dotnet_naming_rule.private_const_fields_should_be__camel.symbols = private_const_fields
-dotnet_naming_rule.private_const_fields_should_be__camel.style = _camel_case_style
+dotnet_naming_rule.private_const_fields_should_be__camel.style = pascal_case_style
 dotnet_naming_rule.private_const_fields_should_be__camel.severity = error
 
 dotnet_naming_rule.private_properties_should_be__camel.symbols = private_properties
