@@ -11,8 +11,12 @@
 ### 提交 ```.githook/pre-push```
 - 專案成員下次拉取後，將自動再次更新 push 設置
 
-### .editorconfig 中間底線無法判斷
-1. 使用自訂分析器 AnalyzerCode
-2. bin 資料夾的 AnalyzerCode.dll 放進 Visual Studio 分析器，或開啟 AnalyzerCode.sln 修改並建置專案
-3. 開啟 Visual Studio 開啟方案總管(Solution Explorer)>右鍵當前方案或專案>加入>並找到分析器(Analyzer)
-4. 選擇 AnalyzerCode.dll 按下確認完成設置
+### 中間無底線設置 (.editorconfig 中間底線無法判斷)
+1. 快速設置將 ```Directory.Build.props``` 放入專案根目錄(有解決方案的 -> .sln)，將 ```bin``` 資料夾的 ```AnalyzerCode.dll``` 一併放入跟 ```Directory.Build.props``` 同層
+---
+##### 手動設置
+---
+2. 使用自訂分析器 ```AnalyzerCode```
+3. ```bin``` 資料夾的 ```AnalyzerCode.dll``` 放進 ```Visual Studio``` 分析器，或開啟 ```AnalyzerCode.sln``` 修改並建置專案
+4. 開啟 ```Visual Studio``` 開啟方案總管(Solution Explorer)>右鍵當前方案或專案>加入>並找到分析器(Analyzer)
+5. 選擇 ```AnalyzerCode.dll``` 按下確認完成設置
