@@ -46,6 +46,16 @@ dotnet_naming_style.camel_case_style.capitalization = camel_case
 dotnet_naming_style.camel_case_style.required_prefix =
 dotnet_naming_style.camel_case_style.required_suffix =
 
+# _constPascalCase
+dotnet_naming_style._const_pascal_case_style.capitalization = pascal_case
+dotnet_naming_style._const_pascal_case_style.required_prefix = _const
+dotnet_naming_style._const_pascal_case_style.required_suffix =
+
+# ConstPascalCase
+dotnet_naming_style.const_pascal_case_style.capitalization = pascal_case
+dotnet_naming_style.const_pascal_case_style.required_prefix = Const
+dotnet_naming_style.const_pascal_case_style.required_suffix =
+
 ########################################
 # 命名符號群組定義
 ########################################
@@ -93,6 +103,11 @@ dotnet_naming_symbols.static_or_private_internal_fields.required_modifiers = sta
 dotnet_naming_symbols.private_const_fields.applicable_kinds = field
 dotnet_naming_symbols.private_const_fields.applicable_accessibilities = private
 dotnet_naming_symbols.private_const_fields.required_modifiers = const
+
+# public const 欄位群組
+dotnet_naming_symbols.public_const_fields.applicable_kinds = field
+dotnet_naming_symbols.public_const_fields.applicable_accessibilities = public
+dotnet_naming_symbols.public_const_fields.required_modifiers = const
 
 # private 屬性
 dotnet_naming_symbols.private_properties.applicable_kinds = property
@@ -144,8 +159,12 @@ dotnet_naming_rule.static_or_private_internal_fields_should_be_s_camel.style = s
 dotnet_naming_rule.static_or_private_internal_fields_should_be_s_camel.severity = error
 
 dotnet_naming_rule.private_const_fields_should_be__camel.symbols = private_const_fields
-dotnet_naming_rule.private_const_fields_should_be__camel.style = _camel_case_style
+dotnet_naming_rule.private_const_fields_should_be__camel.style = _const_pascal_case_style
 dotnet_naming_rule.private_const_fields_should_be__camel.severity = error
+
+dotnet_naming_rule.public_const_fields_should_be_pascal.symbols = public_const_fields
+dotnet_naming_rule.public_const_fields_should_be_pascal.style = const_pascal_case_style
+dotnet_naming_rule.public_const_fields_should_be_pascal.severity = error
 
 dotnet_naming_rule.private_properties_should_be__camel.symbols = private_properties
 dotnet_naming_rule.private_properties_should_be__camel.style = _camel_case_style
