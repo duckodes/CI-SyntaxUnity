@@ -1,0 +1,11 @@
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\bin\Debug\netstandard2.0\AnalyzerCode.deps.json
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\bin\Debug\netstandard2.0\AnalyzerCode.dll
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\bin\Debug\netstandard2.0\AnalyzerCode.pdb
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\obj\Debug\netstandard2.0\AnalyzerCode.csproj.AssemblyReference.cache
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\obj\Debug\netstandard2.0\AnalyzerCode.GeneratedMSBuildEditorConfig.editorconfig
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\obj\Debug\netstandard2.0\AnalyzerCode.AssemblyInfoInputs.cache
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\obj\Debug\netstandard2.0\AnalyzerCode.AssemblyInfo.cs
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\obj\Debug\netstandard2.0\AnalyzerCode.csproj.CoreCompileInputs.cache
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\obj\Debug\netstandard2.0\AnalyzerCode.sourcelink.json
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\obj\Debug\netstandard2.0\AnalyzerCode.dll
+D:\note\github\CI-SyntaxUnity\AnalyzerCode\obj\Debug\netstandard2.0\AnalyzerCode.pdb
