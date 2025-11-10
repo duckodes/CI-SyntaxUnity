@@ -98,6 +98,11 @@ dotnet_naming_symbols.private_const_fields.required_modifiers = const
 dotnet_naming_symbols.private_properties.applicable_kinds = property
 dotnet_naming_symbols.private_properties.applicable_accessibilities = private
 
+# 符號群組：方法參數
+dotnet_naming_symbols.method_parameters.applicable_kinds = parameter
+dotnet_naming_symbols.method_parameters.applicable_accessibilities = *
+dotnet_naming_symbols.method_parameters.required_modifiers =
+
 ########################################
 # 命名規則套用
 ########################################
@@ -145,6 +150,10 @@ dotnet_naming_rule.private_const_fields_should_be__camel.severity = error
 dotnet_naming_rule.private_properties_should_be__camel.symbols = private_properties
 dotnet_naming_rule.private_properties_should_be__camel.style = _camel_case_style
 dotnet_naming_rule.private_properties_should_be__camel.severity = error
+
+dotnet_naming_rule.method_parameters_should_be_camel_case.symbols = method_parameters
+dotnet_naming_rule.method_parameters_should_be_camel_case.style = camel_case_style
+dotnet_naming_rule.method_parameters_should_be_camel_case.severity = error
 
 [*.csproj]
 # 不套用任何格式規則，避免 dotnet format 檢查此類型
