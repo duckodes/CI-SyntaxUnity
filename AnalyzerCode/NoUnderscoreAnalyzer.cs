@@ -9,7 +9,7 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
     public const string ConstDiagnosticId = "IDE99999";
     private static readonly LocalizableString s_title = "名稱不能包含底線";
     private static readonly LocalizableString s_messageFormat = "符號 '{0}' 包含底線 '_'";
-    private static readonly LocalizableString s_description = "命名規則禁止使用底線";
+    private static readonly LocalizableString s_description = "命名規則禁止使用底線.";
     private const string _constCategory = "Naming";
 
     private static DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
@@ -27,7 +27,7 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType, SymbolKind.Method, SymbolKind.Field, SymbolKind.Property, SymbolKind.Parameter);
 
-        // 語法分析：區域變數宣告
+        // 區域變數宣告分析
         context.RegisterSyntaxNodeAction(AnalyzeLocalVariable, Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator);
         context.RegisterSyntaxNodeAction(AnalyzeForEachVariable, Microsoft.CodeAnalysis.CSharp.SyntaxKind.ForEachStatement);
     }
@@ -35,6 +35,8 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeSymbol(SymbolAnalysisContext context)
     {
         var symbol = context.Symbol;
+
+        // 去除get;set;檢查
         if (symbol is IMethodSymbol methodSymbol &&
            (methodSymbol.MethodKind == MethodKind.PropertyGet || methodSymbol.MethodKind == MethodKind.PropertySet))
         {
@@ -42,7 +44,19 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
         }
         var name = symbol.Name;
 
-        // 檢查是否有底線，但排除開頭和結尾
+        // s_ 開頭只檢查後面部分是否還有底線
+        if (name.Length > 2 && name.StartsWith("s_"))
+        {
+            var afterPrefix = name.Substring(2);
+            if (afterPrefix.Contains("_"))
+            {
+                var diagnostic = Diagnostic.Create(s_rule, symbol.Locations[0], symbol.Name);
+                context.ReportDiagnostic(diagnostic);
+            }
+            return;
+        }
+
+        // 檢查是否有底線並排除開頭和結尾
         if (name.Length > 2 && name.Substring(1, name.Length - 2).Contains("_"))
         {
             var diagnostic = Diagnostic.Create(s_rule, symbol.Locations[0], symbol.Name);
@@ -52,7 +66,21 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeLocalVariable(SyntaxNodeAnalysisContext context)
     {
         var variableDeclarator = (Microsoft.CodeAnalysis.CSharp.Syntax.VariableDeclaratorSyntax)context.Node;
+
+        var parent = variableDeclarator.Parent;
+        if (parent == null) return;
+        var grandParent = parent.Parent;
+        if (!(grandParent is Microsoft.CodeAnalysis.CSharp.Syntax.LocalDeclarationStatementSyntax))
+        {
+            return;
+        }
+
         var name = variableDeclarator.Identifier.Text;
+
+        if (name.StartsWith("s_"))
+        {
+            return;
+        }
 
         // 檢查中間是否有底線
         if (name.Length > 2 && name.Substring(1, name.Length - 2).Contains("_"))
@@ -66,7 +94,7 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
         var forEachStatement = (Microsoft.CodeAnalysis.CSharp.Syntax.ForEachStatementSyntax)context.Node;
         var identifier = forEachStatement.Identifier.Text;
 
-        // 檢查中間是否有底線（排除開頭和結尾）
+        // 檢查中間是否有底線並排除開頭和結尾
         if (identifier.Length > 2 && identifier.Substring(1, identifier.Length - 2).Contains("_"))
         {
             var diagnostic = Diagnostic.Create(s_rule, forEachStatement.Identifier.GetLocation(), identifier);

@@ -36,6 +36,11 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                 var middle = name.Substring(1, name.Length - 2).Replace("_", "");
                 newName = name[0] + middle + name[name.Length - 1];
             }
+            if (name.StartsWith("s_") && name.Length > 3)
+            {
+                var afterPrefix = name.Substring(2).Replace("_", "");
+                newName = "s_" + afterPrefix;
+            }
 
             context.RegisterCodeFix(
                 CodeAction.Create(
@@ -49,19 +54,37 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
     private async Task<Solution> RenameSymbolAsync(Document document, ISymbol symbol, CancellationToken cancellationToken)
     {
         var name = symbol.Name;
+        var solution = document.Project.Solution;
 
-        // 只移除中間的底線，保留開頭和結尾
+        if (name.StartsWith("s_") && name.Length > 3)
+        {
+            var afterPrefix = name.Substring(2).Replace("_", "");
+            var newName = "s_" + afterPrefix;
+
+            return await Renamer.RenameSymbolAsync(
+                solution,
+                symbol,
+                new SymbolRenameOptions(),
+                newName,
+                cancellationToken
+            ).ConfigureAwait(false);
+        }
+
         if (name.Length > 2)
         {
             var middle = name.Substring(1, name.Length - 2).Replace("_", "");
             var newName = name[0] + middle + name[name.Length - 1];
 
-            var solution = document.Project.Solution;
-            return await Renamer.RenameSymbolAsync(solution, symbol, newName, solution.Workspace.Options, cancellationToken).ConfigureAwait(false);
+            return await Renamer.RenameSymbolAsync(
+                solution,
+                symbol,
+                new SymbolRenameOptions(),
+                newName,
+                cancellationToken
+            ).ConfigureAwait(false);
         }
 
-        // 如果長度 <= 2，就不處理
-        return document.Project.Solution;
+        return solution;
     }
 
 }
