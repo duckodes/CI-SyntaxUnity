@@ -29,6 +29,7 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
 
         // 語法分析：區域變數宣告
         context.RegisterSyntaxNodeAction(AnalyzeLocalVariable, Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator);
+        context.RegisterSyntaxNodeAction(AnalyzeForEachVariable, Microsoft.CodeAnalysis.CSharp.SyntaxKind.ForEachStatement);
     }
 
     private static void AnalyzeSymbol(SymbolAnalysisContext context)
@@ -60,4 +61,17 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(diagnostic);
         }
     }
+    private static void AnalyzeForEachVariable(SyntaxNodeAnalysisContext context)
+    {
+        var forEachStatement = (Microsoft.CodeAnalysis.CSharp.Syntax.ForEachStatementSyntax)context.Node;
+        var identifier = forEachStatement.Identifier.Text;
+
+        // 檢查中間是否有底線（排除開頭和結尾）
+        if (identifier.Length > 2 && identifier.Substring(1, identifier.Length - 2).Contains("_"))
+        {
+            var diagnostic = Diagnostic.Create(s_rule, forEachStatement.Identifier.GetLocation(), identifier);
+            context.ReportDiagnostic(diagnostic);
+        }
+    }
+
 }
