@@ -34,6 +34,11 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeSymbol(SymbolAnalysisContext context)
     {
         var symbol = context.Symbol;
+        if (symbol is IMethodSymbol methodSymbol &&
+           (methodSymbol.MethodKind == MethodKind.PropertyGet || methodSymbol.MethodKind == MethodKind.PropertySet))
+        {
+            return;
+        }
         var name = symbol.Name;
 
         // 檢查是否有底線，但排除開頭和結尾
