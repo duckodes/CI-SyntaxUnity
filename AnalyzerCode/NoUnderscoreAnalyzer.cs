@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 
 using Microsoft.CodeAnalysis;
@@ -43,6 +44,46 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
             return;
         }
         var name = symbol.Name;
+
+        // 允許特定方法前墜
+        if (symbol is IMethodSymbol)
+        {
+            string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_" };
+
+            foreach (var prefix in allowedMethodPrefixes)
+            {
+                if (name.StartsWith(prefix))
+                {
+                    var afterPrefix = name.Substring(prefix.Length);
+
+                    if (afterPrefix.Length > 0 && !char.IsUpper(afterPrefix[0]))
+                    {
+                        var diagnostic = Diagnostic.Create(s_rule, symbol.Locations[0], symbol.Name);
+                        context.ReportDiagnostic(diagnostic);
+                    }
+
+                    if (afterPrefix.Contains("_"))
+                    {
+                        var diagnostic = Diagnostic.Create(s_rule, symbol.Locations[0], symbol.Name);
+                        context.ReportDiagnostic(diagnostic);
+                    }
+
+                    return;
+                }
+            }
+
+            var lowerName = name.ToLower();
+            foreach (var prefix in allowedMethodPrefixes)
+            {
+                var prefixWithoutUnderscore = prefix.Replace("_", "").ToLower();
+                if (lowerName.Contains(prefixWithoutUnderscore) && !name.StartsWith(prefix))
+                {
+                    var diagnostic = Diagnostic.Create(s_rule, symbol.Locations[0], symbol.Name);
+                    context.ReportDiagnostic(diagnostic);
+                    return;
+                }
+            }
+        }
 
         // s_ 開頭只檢查後面部分是否還有底線
         if (name.Length > 2 && name.StartsWith("s_"))

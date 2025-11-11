@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Immutable;
 using System.Composition;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +33,7 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
             // 計算移除中間底線後的新名稱
             var name = symbol.Name;
             string newName = name;
+
             if (name.Length > 2)
             {
                 var middle = name.Substring(1, name.Length - 2).Replace("_", "");
@@ -40,6 +43,40 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
             {
                 var afterPrefix = name.Substring(2).Replace("_", "");
                 newName = "s_" + afterPrefix;
+            }
+            string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_" };
+            if (symbol is IMethodSymbol)
+            {
+                foreach (var prefix in allowedMethodPrefixes)
+                {
+                    var prefixWithoutUnderscore = prefix.Replace("_", "");
+                    var index = name.IndexOf(prefixWithoutUnderscore, StringComparison.OrdinalIgnoreCase);
+
+                    if (index >= 0)
+                    {
+                        var beforePrefix = name.Substring(0, index);
+                        var afterPrefix = name.Substring(index + prefixWithoutUnderscore.Length);
+
+                        newName = prefix;
+                        var combined = beforePrefix + afterPrefix;
+
+                        if (!string.IsNullOrEmpty(combined))
+                        {
+                            if (combined.Contains("_"))
+                            {
+                                var parts = combined.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
+                                combined = parts[0] + string.Concat(parts.Skip(1).Select(p => char.ToUpper(p[0]) + p.Substring(1)));
+                            }
+
+                            if (combined.Length > 0 && !char.IsUpper(combined[0]))
+                            {
+                                combined = char.ToUpper(combined[0]) + combined.Substring(1);
+                            }
+
+                            newName += combined;
+                        }
+                    }
+                }
             }
 
             context.RegisterCodeFix(
@@ -55,6 +92,54 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
     {
         var name = symbol.Name;
         var solution = document.Project.Solution;
+
+        string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_" };
+        if (symbol is IMethodSymbol)
+        {
+            foreach (var prefix in allowedMethodPrefixes)
+            {
+                var prefixWithoutUnderscore = prefix.Replace("_", "");
+                var index = name.IndexOf(prefixWithoutUnderscore, StringComparison.OrdinalIgnoreCase);
+
+                if (index >= 0)
+                {
+                    var beforePrefix = name.Substring(0, index);
+                    var afterPrefix = name.Substring(index + prefixWithoutUnderscore.Length);
+
+                    var newName = prefix;
+                    var combined = beforePrefix + afterPrefix;
+
+                    if (!string.IsNullOrEmpty(combined))
+                    {
+                        if (combined.Contains("_"))
+                        {
+                            var parts = combined.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
+                            combined = parts[0] + string.Concat(parts.Skip(1).Select(p => char.ToUpper(p[0]) + p.Substring(1)));
+                        }
+
+                        if (combined.Length > 0 && !char.IsUpper(combined[0]))
+                        {
+                            combined = char.ToUpper(combined[0]) + combined.Substring(1);
+                        }
+
+                        newName += combined;
+                    }
+
+                    if (newName != name)
+                    {
+                        return await Renamer.RenameSymbolAsync(
+                            solution,
+                            symbol,
+                            new SymbolRenameOptions(),
+                            newName,
+                            cancellationToken
+                        ).ConfigureAwait(false);
+                    }
+
+                    return solution;
+                }
+            }
+        }
 
         if (name.StartsWith("s_") && name.Length > 3)
         {
