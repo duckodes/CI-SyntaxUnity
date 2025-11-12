@@ -99,6 +99,7 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                         { "RectTransform", "RT_" },
                         { "GameObject", "GO_" },
                         { "CanvasGroup", "CG_" },
+                        { "ParticleSystem", "VFX_" },
                     };
                     var typePrefixMapPrivate = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                     {
@@ -114,6 +115,7 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                         { "RectTransform", "rt" },
                         { "GameObject", "go" },
                         { "CanvasGroup", "cg" },
+                        { "ParticleSystem", "vfx" },
                     };
 
                     var primaryMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
@@ -201,6 +203,7 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                 { "RectTransform", "RT_" },
                 { "GameObject", "GO_" },
                 { "CanvasGroup", "CG_" },
+                { "ParticleSystem", "VFX_" },
             };
             var typePrefixMapPrivate = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -216,6 +219,7 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                 { "RectTransform", "rt" },
                 { "GameObject", "go" },
                 { "CanvasGroup", "cg" },
+                { "ParticleSystem", "vfx" },
             };
 
             var primaryMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public

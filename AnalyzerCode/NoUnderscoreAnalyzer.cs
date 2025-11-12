@@ -60,6 +60,7 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
                 { "RectTransform", "RT_" },
                 { "GameObject", "GO_" },
                 { "CanvasGroup", "CG_" },
+                { "ParticleSystem", "VFX_" },
             };
             var typePrefixMapPrivate = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -75,6 +76,7 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
                 { "RectTransform", "rt" },
                 { "GameObject", "go" },
                 { "CanvasGroup", "cg" },
+                { "ParticleSystem", "vfx" },
             };
 
             var primaryMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
@@ -108,6 +110,10 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
                 ? char.ToUpper(basePrefix[0]) + basePrefix.Substring(1)
                 : "_" + basePrefix;
 
+            if (fieldSymbol.DeclaredAccessibility == Accessibility.Public && !symbol.Name.Replace(basePrefix, "").Contains("_"))
+            {
+                return;
+            }
             if (!fieldSymbol.Name.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 var diagnostic = Diagnostic.Create(
