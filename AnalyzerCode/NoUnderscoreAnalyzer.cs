@@ -42,6 +42,9 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
         // Class欄位命名
         if (symbol is IFieldSymbol fieldSymbol)
         {
+            if (fieldSymbol.IsStatic)
+                return;
+
             if (fieldSymbol.Type.TypeKind != TypeKind.Class)
                 return;
 
