@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Collections.Immutable;
+using System.Collections.Generic;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -37,6 +39,87 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
     {
         var symbol = context.Symbol;
 
+        // Class欄位命名
+        if (symbol is IFieldSymbol fieldSymbol)
+        {
+            if (fieldSymbol.Type.TypeKind != TypeKind.Class)
+                return;
+
+            var typeName = fieldSymbol.Type.Name;
+
+            var typePrefixMapPublic = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Button", "Btn_" },
+                { "Text", "Text_" },
+                { "Label", "Label_" },
+                { "Image", "Img_" },
+                { "RawImage", "RawImg_" },
+                { "Sprite", "Sprite_" },
+                { "Rigidbody", "RB_" },
+                { "ReferenceCollector", "RC_" },
+                { "RectTransform", "RT_" },
+                { "GameObject", "GO_" },
+                { "CanvasGroup", "CG_" },
+            };
+            var typePrefixMapPrivate = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Button", "btn" },
+                { "Text", "text" },
+                { "Label", "label" },
+                { "Image", "img" },
+                { "RawImage", "rawImg" },
+                { "Sprite", "sprite" },
+                { "Texture2D", "tex2D" },
+                { "Rigidbody", "rb" },
+                { "ReferenceCollector", "rc" },
+                { "RectTransform", "rt" },
+                { "GameObject", "go" },
+                { "CanvasGroup", "cg" },
+            };
+
+            var primaryMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
+                ? typePrefixMapPublic
+                : typePrefixMapPrivate;
+
+            var fallbackMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
+                ? typePrefixMapPrivate
+                : typePrefixMapPublic;
+
+            string basePrefix = "";
+            if (!primaryMap.TryGetValue(typeName, out basePrefix))
+            {
+                if (!fallbackMap.TryGetValue(typeName, out basePrefix))
+                {
+                    foreach (var kvp in primaryMap.Concat(fallbackMap))
+                    {
+                        if (typeName.IndexOf(kvp.Key, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            basePrefix = kvp.Value;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(basePrefix))
+                return;
+
+            string expectedPrefix = fieldSymbol.DeclaredAccessibility == Accessibility.Public
+                ? char.ToUpper(basePrefix[0]) + basePrefix.Substring(1)
+                : "_" + basePrefix;
+
+            if (!fieldSymbol.Name.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                var diagnostic = Diagnostic.Create(
+                    s_rule,
+                    symbol.Locations[0],
+                    fieldSymbol.Name,
+                    expectedPrefix
+                );
+                context.ReportDiagnostic(diagnostic);
+            }
+        }
+
         // 去除get;set;檢查
         if (symbol is IMethodSymbol methodSymbol &&
            (methodSymbol.MethodKind == MethodKind.PropertyGet || methodSymbol.MethodKind == MethodKind.PropertySet))
@@ -48,7 +131,7 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
         // 允許特定方法前墜
         if (symbol is IMethodSymbol)
         {
-            string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_" };
+            string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_", "OnClick_", "OnContinue_", "OnValueChange_", "OnPress_", "OnRelease_", "RPC_" };
 
             foreach (var prefix in allowedMethodPrefixes)
             {

@@ -4,6 +4,8 @@ using System.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -44,7 +46,7 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                 var afterPrefix = name.Substring(2).Replace("_", "");
                 newName = "s_" + afterPrefix;
             }
-            string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_" };
+            string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_", "OnClick_", "OnContinue_", "OnValueChange_", "OnPress_", "OnRelease_", "RPC_" };
             if (symbol is IMethodSymbol)
             {
                 foreach (var prefix in allowedMethodPrefixes)
@@ -78,6 +80,92 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                     }
                 }
             }
+            if (symbol is IFieldSymbol fieldSymbol)
+            {
+                if (fieldSymbol.Type.TypeKind == TypeKind.Class)
+                {
+                    var typeName = fieldSymbol.Type.Name;
+
+                    var typePrefixMapPublic = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        { "Button", "Btn_" },
+                        { "Text", "Text_" },
+                        { "Label", "Label_" },
+                        { "Image", "Img_" },
+                        { "RawImage", "RawImg_" },
+                        { "Sprite", "Sprite_" },
+                        { "Rigidbody", "RB_" },
+                        { "ReferenceCollector", "RC_" },
+                        { "RectTransform", "RT_" },
+                        { "GameObject", "GO_" },
+                        { "CanvasGroup", "CG_" },
+                    };
+                    var typePrefixMapPrivate = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        { "Button", "btn" },
+                        { "Text", "text" },
+                        { "Label", "label" },
+                        { "Image", "img" },
+                        { "RawImage", "rawImg" },
+                        { "Sprite", "sprite" },
+                        { "Texture2D", "tex2D" },
+                        { "Rigidbody", "rb" },
+                        { "ReferenceCollector", "rc" },
+                        { "RectTransform", "rt" },
+                        { "GameObject", "go" },
+                        { "CanvasGroup", "cg" },
+                    };
+
+                    var primaryMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
+                        ? typePrefixMapPublic
+                        : typePrefixMapPrivate;
+
+                    var fallbackMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
+                        ? typePrefixMapPrivate
+                        : typePrefixMapPublic;
+
+                    string expectedPrefix = "";
+                    if (!primaryMap.TryGetValue(typeName, out expectedPrefix))
+                    {
+                        if (!fallbackMap.TryGetValue(typeName, out expectedPrefix))
+                        {
+                            foreach (var kvp in primaryMap.Concat(fallbackMap))
+                            {
+                                if (typeName.IndexOf(kvp.Key, StringComparison.OrdinalIgnoreCase) >= 0)
+                                {
+                                    expectedPrefix = kvp.Value;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(expectedPrefix))
+                    {
+                        string fieldName = fieldSymbol.Name;
+
+                        string cleanedName = Regex.Replace(fieldName, expectedPrefix, "", RegexOptions.IgnoreCase).Replace("_", "");
+
+                        if (fieldSymbol.DeclaredAccessibility == Accessibility.Public)
+                        {
+                            cleanedName = cleanedName.TrimStart('_');
+                            if (!string.IsNullOrEmpty(cleanedName))
+                            {
+                                cleanedName = char.ToUpper(cleanedName[0]) + cleanedName.Substring(1);
+                                newName = char.ToUpper(expectedPrefix[0]) + expectedPrefix.Substring(1) + cleanedName;
+                            }
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(cleanedName))
+                            {
+                                cleanedName = char.ToUpper(cleanedName[0]) + cleanedName.Substring(1);
+                                newName = "_" + expectedPrefix + cleanedName;
+                            }
+                        }
+                    }
+                }
+            }
 
             context.RegisterCodeFix(
                 CodeAction.Create(
@@ -93,7 +181,103 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
         var name = symbol.Name;
         var solution = document.Project.Solution;
 
-        string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_" };
+        if (symbol is IFieldSymbol fieldSymbol)
+        {
+            if (fieldSymbol.Type.TypeKind != TypeKind.Class)
+                return solution;
+
+            var typeName = fieldSymbol.Type.Name;
+
+            var typePrefixMapPublic = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Button", "Btn_" },
+                { "Text", "Text_" },
+                { "Label", "Label_" },
+                { "Image", "Img_" },
+                { "RawImage", "RawImg_" },
+                { "Sprite", "Sprite_" },
+                { "Rigidbody", "RB_" },
+                { "ReferenceCollector", "RC_" },
+                { "RectTransform", "RT_" },
+                { "GameObject", "GO_" },
+                { "CanvasGroup", "CG_" },
+            };
+            var typePrefixMapPrivate = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Button", "btn" },
+                { "Text", "text" },
+                { "Label", "label" },
+                { "Image", "img" },
+                { "RawImage", "rawImg" },
+                { "Sprite", "sprite" },
+                { "Texture2D", "tex2D" },
+                { "Rigidbody", "rb" },
+                { "ReferenceCollector", "rc" },
+                { "RectTransform", "rt" },
+                { "GameObject", "go" },
+                { "CanvasGroup", "cg" },
+            };
+
+            var primaryMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
+                ? typePrefixMapPublic
+                : typePrefixMapPrivate;
+
+            var fallbackMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
+                ? typePrefixMapPrivate
+                : typePrefixMapPublic;
+
+            string expectedPrefix = "";
+            if (!primaryMap.TryGetValue(typeName, out expectedPrefix))
+            {
+                if (!fallbackMap.TryGetValue(typeName, out expectedPrefix))
+                {
+                    foreach (var kvp in primaryMap.Concat(fallbackMap))
+                    {
+                        if (typeName.IndexOf(kvp.Key, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            expectedPrefix = kvp.Value;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(expectedPrefix))
+                return solution;
+
+            string fieldName = fieldSymbol.Name;
+
+            string cleanedName = Regex.Replace(fieldName, expectedPrefix, "", RegexOptions.IgnoreCase).Replace("_", "");
+
+            string newName;
+            if (fieldSymbol.DeclaredAccessibility == Accessibility.Public)
+            {
+                cleanedName = cleanedName.TrimStart('_');
+                if (string.IsNullOrEmpty(cleanedName))
+                    return solution;
+
+                cleanedName = char.ToUpper(cleanedName[0]) + cleanedName.Substring(1);
+                newName = char.ToUpper(expectedPrefix[0]) + expectedPrefix.Substring(1) + cleanedName;
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(cleanedName))
+                    return solution;
+
+                cleanedName = char.ToUpper(cleanedName[0]) + cleanedName.Substring(1);
+                newName = "_" + expectedPrefix + cleanedName;
+            }
+
+            return await Renamer.RenameSymbolAsync(
+                solution,
+                symbol,
+                new SymbolRenameOptions(),
+                newName,
+                cancellationToken
+            ).ConfigureAwait(false);
+        }
+
+        string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_", "OnClick_", "OnContinue_", "OnValueChange_", "OnPress_", "OnRelease_", "RPC_" };
         if (symbol is IMethodSymbol)
         {
             foreach (var prefix in allowedMethodPrefixes)
