@@ -58,12 +58,17 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
                 { "Image", "Img_" },
                 { "RawImage", "RawImg_" },
                 { "Sprite", "Sprite_" },
+                { "Texture2D", "Tex2D_" },
                 { "Rigidbody", "RB_" },
                 { "ReferenceCollector", "RC_" },
                 { "RectTransform", "RT_" },
                 { "GameObject", "GO_" },
                 { "CanvasGroup", "CG_" },
                 { "ParticleSystem", "VFX_" },
+                { "InputField", "InputField_" },
+                { "OutlineWith8Direction", "Outline8Dir_" },
+                { "EnhancedScroller", "ES_" },
+                { "EnhancedScrollerCellSource", "ESCell_" },
             };
             var typePrefixMapPrivate = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -80,6 +85,10 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
                 { "GameObject", "go" },
                 { "CanvasGroup", "cg" },
                 { "ParticleSystem", "vfx" },
+                { "InputField", "inputField" },
+                { "OutlineWith8Direction", "outline8Dir" },
+                { "EnhancedScroller", "es" },
+                { "EnhancedScrollerCellSource", "esCell" },
             };
 
             var primaryMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
@@ -141,7 +150,12 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
         if (symbol is IMethodSymbol)
         {
             string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_", "OnClick_", "OnContinue_", "OnValueChange_", "OnPress_", "OnRelease_", "RPC_" };
-
+            
+            if (!allowedMethodPrefixes.Any(prefix => name.StartsWith(prefix)))
+            {
+                // 除了前墜是這些其他都跳過
+                return;
+            }
             foreach (var prefix in allowedMethodPrefixes)
             {
                 if (name.StartsWith(prefix))
@@ -193,6 +207,29 @@ public class NoUnderscoreAnalyzer : DiagnosticAnalyzer
         if (name.Length > 2 && name.Substring(1, name.Length - 2).Contains("_"))
         {
             var diagnostic = Diagnostic.Create(s_rule, symbol.Locations[0], symbol.Name);
+            
+            // Class 類型
+            if (symbol is INamedTypeSymbol namedTypeSymbol
+                && namedTypeSymbol.TypeKind == TypeKind.Class)
+            {
+                var warningRule = new DiagnosticDescriptor(
+                    s_rule.Id,
+                    s_rule.Title,
+                    s_rule.MessageFormat,
+                    s_rule.Category,
+                    DiagnosticSeverity.Warning,
+                    s_rule.IsEnabledByDefault,
+                    s_rule.Description,
+                    s_rule.HelpLinkUri,
+                    s_rule.CustomTags.ToArray()
+                );
+                diagnostic = Diagnostic.Create(warningRule, symbol.Locations[0], symbol.Name);
+            }
+            // 其他
+            else
+            {
+                diagnostic = Diagnostic.Create(s_rule, symbol.Locations[0], symbol.Name);
+            }
             context.ReportDiagnostic(diagnostic);
         }
     }

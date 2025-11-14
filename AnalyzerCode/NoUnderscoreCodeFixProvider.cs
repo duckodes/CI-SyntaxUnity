@@ -94,12 +94,17 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                         { "Image", "Img_" },
                         { "RawImage", "RawImg_" },
                         { "Sprite", "Sprite_" },
+                        { "Texture2D", "Tex2D_" },
                         { "Rigidbody", "RB_" },
                         { "ReferenceCollector", "RC_" },
                         { "RectTransform", "RT_" },
                         { "GameObject", "GO_" },
                         { "CanvasGroup", "CG_" },
                         { "ParticleSystem", "VFX_" },
+                        { "InputField", "InputField_" },
+                        { "OutlineWith8Direction", "Outline8Dir_" },
+                        { "EnhancedScroller", "ES_" },
+                        { "EnhancedScrollerCellSource", "ESCell_" },
                     };
                     var typePrefixMapPrivate = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                     {
@@ -116,6 +121,10 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                         { "GameObject", "go" },
                         { "CanvasGroup", "cg" },
                         { "ParticleSystem", "vfx" },
+                        { "InputField", "inputField" },
+                        { "OutlineWith8Direction", "outline8Dir" },
+                        { "EnhancedScroller", "es" },
+                        { "EnhancedScrollerCellSource", "esCell" },
                     };
 
                     var primaryMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
@@ -198,12 +207,17 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                 { "Image", "Img_" },
                 { "RawImage", "RawImg_" },
                 { "Sprite", "Sprite_" },
+                { "Texture2D", "Tex2D_" },
                 { "Rigidbody", "RB_" },
                 { "ReferenceCollector", "RC_" },
                 { "RectTransform", "RT_" },
                 { "GameObject", "GO_" },
                 { "CanvasGroup", "CG_" },
                 { "ParticleSystem", "VFX_" },
+                { "InputField", "InputField_" },
+                { "OutlineWith8Direction", "Outline8Dir_" },
+                { "EnhancedScroller", "ES_" },
+                { "EnhancedScrollerCellSource", "ESCell_" },
             };
             var typePrefixMapPrivate = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -220,6 +234,10 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
                 { "GameObject", "go" },
                 { "CanvasGroup", "cg" },
                 { "ParticleSystem", "vfx" },
+                { "InputField", "inputField" },
+                { "OutlineWith8Direction", "outline8Dir" },
+                { "EnhancedScroller", "es" },
+                { "EnhancedScrollerCellSource", "esCell" },
             };
 
             var primaryMap = fieldSymbol.DeclaredAccessibility == Accessibility.Public
@@ -283,7 +301,7 @@ public class NoUnderscoreCodeFixProvider : CodeFixProvider
 
         string[] allowedMethodPrefixes = { "BtnClick_", "InputField_", "FadeOutWindow_", "OnClick_", "OnContinue_", "OnValueChange_", "OnPress_", "OnRelease_", "RPC_" };
         if (symbol is IMethodSymbol)
-        {
+        {   
             foreach (var prefix in allowedMethodPrefixes)
             {
                 var prefixWithoutUnderscore = prefix.Replace("_", "");
